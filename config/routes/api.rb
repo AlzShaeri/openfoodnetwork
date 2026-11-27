@@ -87,6 +87,7 @@ Openfoodnetwork::Application.routes.draw do
 
     namespace :v1 do
       resources :customers, except: [:new, :edit]
+      resources :order_cycles, only: [:index, :show]
 
       # There is no Api::V1::EnterprisesController, so `show` 404s. It's kept
       # only because Api::V1::CustomerSerializer advertises it as the `related`

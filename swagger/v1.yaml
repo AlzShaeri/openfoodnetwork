@@ -766,5 +766,306 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/customers_collection"
+  "/api/v1/order_cycles":
+    get:
+      summary: List accessible order cycles
+      tags:
+      - Order cycles
+      security:
+      - api_key_header: []
+      - api_key_param: []
+      - session: []
+      description: Returns order cycles visible to the current user, ordered by ID.
+        Includes past, current and future cycles. Distributor IDs follow the existing
+        order-cycle enterprise visibility rules.
+      parameters:
+      - name: X-Api-Token
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+        description: Rows per page. Values above 200 are capped at 200.
+      responses:
+        '200':
+          description: Accessible order cycles, including an empty collection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '1'
+                        type:
+                          type: string
+                          example: order_cycle
+                        attributes:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: Weekly order cycle
+                            orders_open_at:
+                              type: string
+                              format: date-time
+                              nullable: true
+                              example: '2026-11-01T00:00:00Z'
+                            orders_close_at:
+                              type: string
+                              format: date-time
+                              nullable: true
+                              example: '2026-11-08T00:00:00Z'
+                            coordinator_id:
+                              type: integer
+                              example: 2
+                            distributor_ids:
+                              type: array
+                              items:
+                                type: integer
+                              example:
+                              - 2
+                              - 3
+                          required:
+                          - id
+                          - name
+                          - orders_open_at
+                          - orders_close_at
+                          - coordinator_id
+                          - distributor_ids
+                        relationships:
+                          type: object
+                          properties: {}
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          results:
+                            type: integer
+                            example: 250
+                          pages:
+                            type: integer
+                            example: 5
+                          page:
+                            type: integer
+                            example: 2
+                          per_page:
+                            type: integer
+                            example: 50
+                    required:
+                    - pagination
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      prev:
+                        type: string
+                        nullable: true
+                      next:
+                        type: string
+                        nullable: true
+                      last:
+                        type: string
+                required:
+                - data
+                - meta
+                - links
+        '401':
+          description: Missing or invalid credentials, or insufficient permission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        detail:
+                          type: string
+                        source:
+                          type: object
+                      required:
+                      - detail
+                required:
+                - errors
+        '422':
+          description: Invalid pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        detail:
+                          type: string
+                        source:
+                          type: object
+                      required:
+                      - detail
+                required:
+                - errors
+  "/api/v1/order_cycles/{id}":
+    get:
+      summary: Get an accessible order cycle
+      tags:
+      - Order cycles
+      security:
+      - api_key_header: []
+      - api_key_param: []
+      - session: []
+      parameters:
+      - name: X-Api-Token
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Order cycle details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: '1'
+                      type:
+                        type: string
+                        example: order_cycle
+                      attributes:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: Weekly order cycle
+                          orders_open_at:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            example: '2026-11-01T00:00:00Z'
+                          orders_close_at:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            example: '2026-11-08T00:00:00Z'
+                          coordinator_id:
+                            type: integer
+                            example: 2
+                          distributor_ids:
+                            type: array
+                            items:
+                              type: integer
+                            example:
+                            - 2
+                            - 3
+                        required:
+                        - id
+                        - name
+                        - orders_open_at
+                        - orders_close_at
+                        - coordinator_id
+                        - distributor_ids
+                      relationships:
+                        type: object
+                        properties: {}
+                  meta:
+                    type: object
+                  links:
+                    type: object
+                required:
+                - data
+        '401':
+          description: Missing or invalid credentials, or insufficient permission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        detail:
+                          type: string
+                        source:
+                          type: object
+                      required:
+                      - detail
+                required:
+                - errors
+        '404':
+          description: Order cycle not found or outside the visible scope
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        detail:
+                          type: string
+                        source:
+                          type: object
+                      required:
+                      - detail
+                required:
+                - errors
 servers:
 - url: "/"
